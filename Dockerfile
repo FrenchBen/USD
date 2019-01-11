@@ -1,5 +1,5 @@
 FROM python:2.7
-ARGS RELEASE=19.01
+ARG RELEASE=19.01
 RUN apt-get update && apt-get install -y build-essential cmake qt4-qmake qt4-default qt4-dev-tools libqt4-dev libxrandr libxcursor-dev libxinerama-dev libglew-dev
 #libgcrypt20-dev zlib1g-dev libxi-dev libxtst-dev0
 RUN pip install pyside pyopengl
