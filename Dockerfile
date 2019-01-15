@@ -11,6 +11,6 @@ RUN python USD-19.01/build_scripts/build_usd.py /usr/local/USD
 # Cleanup packages
 RUN apt-get remove build-essential cmake qt4-qmake qt4-default qt4-dev-tools libqt4-dev && apt-get clean && rm -rf /var/lib/apt/lists/*
 RUN rm -Rf /pixarusd/*
-RUN export PYTHONPATH=/usr/local/lib/USD/
+RUN export PYTHONPATH=/usr/local/USD/lib/python
 RUN export PATH=$PATH:/usr/local/USD/bin
 
