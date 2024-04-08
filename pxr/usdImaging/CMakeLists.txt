@@ -1,6 +1,14 @@
 set(DIRS
-    lib
+    usdImaging
+    usdImagingGL
+    usdProcImaging
+    usdRiPxrImaging
+    usdSkelImaging
+    usdVolImaging
+    usdAppUtils
+    usdviewq
     bin
+    plugin
 )
 
 foreach(d ${DIRS})

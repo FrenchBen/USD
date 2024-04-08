@@ -36,8 +36,8 @@ shader TestNodeOSL
     int inputD[1] = { 1 }
     [[
         string widget = "dynamicArray",
-        string isDynamicArray = "1",
-        string arraySize = "-1",
+        int isDynamicArray = 1,
+        int arraySize = -1,
         string page = "inputs2"
     ]],
     float inputF2[2] = { 1.0, 2.0 } [[
@@ -90,6 +90,10 @@ shader TestNodeOSL
         string widget = "number",
         string page = "inputs2",
         string help = "Invalid because a primvar naming property must have a string type"
+    ]],
+    string inputStrArray[4] = { "test", "string", "array", "values" } [[
+        string widget = "null",
+        string page = "inputs2"
     ]],
     output float resultF = .0 [[
         string widget = "null",

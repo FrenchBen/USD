@@ -26,7 +26,20 @@
 set(_PXR_CXX_FLAGS "${_PXR_CXX_FLAGS} /EHsc")
 
 # Standards compliant.
-set(_PXR_CXX_FLAGS "${_PXR_CXX_FLAGS} /Zc:rvalueCast /Zc:strictStrings /Zc:inline")
+set(_PXR_CXX_FLAGS "${_PXR_CXX_FLAGS} /Zc:rvalueCast /Zc:strictStrings")
+
+# The /Zc:inline option strips out the "arch_ctor_<name>" symbols used for
+# library initialization by ARCH_CONSTRUCTOR starting in Visual Studio 2019, 
+# causing release builds to fail. Disable the option for this and later 
+# versions.
+# 
+# For more details, see:
+# https://developercommunity.visualstudio.com/content/problem/914943/zcinline-removes-extern-symbols-inside-anonymous-n.html
+if (MSVC_VERSION GREATER_EQUAL 1920)
+    set(_PXR_CXX_FLAGS "${_PXR_CXX_FLAGS} /Zc:inline-")
+else()
+    set(_PXR_CXX_FLAGS "${_PXR_CXX_FLAGS} /Zc:inline")
+endif()
 
 # Turn on all but informational warnings.
 set(_PXR_CXX_FLAGS "${_PXR_CXX_FLAGS} /W3")
@@ -35,6 +48,22 @@ set(_PXR_CXX_FLAGS "${_PXR_CXX_FLAGS} /W3")
 if (${PXR_STRICT_BUILD_MODE})
     set(_PXR_CXX_FLAGS "${_PXR_CXX_FLAGS} /WX")
 endif()
+
+# The Visual Studio preprocessor does not conform to the C++ standard,
+# resulting in warnings like:
+#
+#     warning C4003: not enough arguments for function-like macro invocation '_TF_PP_IS_PARENS'
+#
+# These warnings are harmless and can be ignored. They affect a number of
+# code sites that tricky to guard with individual pragmas, so we opt to
+# disable them throughout the build here.
+#
+# Note that these issues are apparently fixed with the "new" preprocessor
+# present in Visual Studio 2019 version 16.5. If/when we enable that option,
+# we should revisit this.
+#
+# https://developercommunity.visualstudio.com/t/standard-conforming-preprocessor-invalid-warning-c/364698
+_disable_warning("4003")
 
 # truncation from 'double' to 'float' due to matrix and vector classes in `Gf`
 _disable_warning("4244")
@@ -86,8 +115,22 @@ if (NOT Boost_USE_STATIC_LIBS)
     _add_define("BOOST_ALL_DYN_LINK")
 endif()
 
+# Suppress automatic boost linking via pragmas, as we must not rely on
+# a heuristic, but upon the tool set we have specified in our build.
+_add_define("BOOST_ALL_NO_LIB")
+
+if(${PXR_USE_DEBUG_PYTHON})
+    _add_define("BOOST_DEBUG_PYTHON")
+    _add_define("BOOST_LINKING_PYTHON")
+endif()
+
 # Need half::_toFloat and half::_eLut.
 _add_define("OPENEXR_DLL")
+
+# Exclude headers from unnecessary Windows APIs to improve build
+# times and avoid annoying conflicts with macros defined in those
+# headers.
+_add_define("WIN32_LEAN_AND_MEAN")
 
 # These files require /bigobj compiler flag
 #   Vt/arrayPyBuffer.cpp
